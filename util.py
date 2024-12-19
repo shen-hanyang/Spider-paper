@@ -22,16 +22,17 @@ def get_urls(browser, config):
             print(f'Page: {page}')
             try:
                 # 寻找页面中的URL
-                accept_poster_div = browser.find_element(By.ID, f"accept-{config.level}")
-                li_elements = accept_poster_div.find_elements(By.CSS_SELECTOR, "div.note.undefined")
+                accept_div = browser.find_element(By.ID, f"accept-{config.level}")
+                li_elements = accept_div.find_elements(By.CSS_SELECTOR, "div.note.undefined")
                 for li in li_elements:
                     a_element = li.find_element(By.TAG_NAME, "h4").find_element(By.TAG_NAME, "a")
                     data_id_list.append(a_element.get_attribute("href"))
 
                 # 处理下一页按钮
                 try:
-                    next_btn = accept_poster_div.find_element(By.CLASS_NAME, "right-arrow").find_element(By.TAG_NAME, "a")
+                    next_btn = accept_div.find_elements(By.CLASS_NAME, "right-arrow")[0].find_element(By.TAG_NAME, "a")
                     browser.execute_script("arguments[0].click();", next_btn)
+                    time.sleep(config.wait_time)
                     page += 1
                 except Exception:
                     break  # 没有下一页时退出循环
@@ -84,10 +85,10 @@ def crawl_meta(config):
     executable_path = config.executable_path
     service = Service(executable_path)
     options = EdgeOptions() if config.browser == "edge" else ChromeOptions()
-    options.add_argument("--headless")
+    # options.add_argument("--headless")
     options.add_argument("--no-sandbox")
     browser = webdriver.Edge(service=service, options=options) if config.browser == "edge" else webdriver.Chrome(service=ChromeService(executable_path), options=options)
-    
+    browser.set_page_load_timeout(config.timeout)
     browser.delete_all_cookies()
     try:
         urls = get_urls(browser, config)
@@ -98,19 +99,20 @@ def crawl_meta(config):
             for url in urls:
                 f.write(f'{url}\n')
         
-        # 获取每个链接的详细信息
-        with open(config.save_informations, 'w', newline='', encoding='utf-8') as file:
-            fieldnames = ["Title", "Authors", "Abstract", "Keywords", "Ratings", "Confidences"]
-            writer = csv.DictWriter(file, fieldnames=fieldnames)
-            writer.writeheader()
-            
-            for url in urls:
-                info = get_information(browser, url, config)
-                if info:
-                    writer.writerow(info)
-                    print(info)
-                else:
-                    print(f"Failed to retrieve data from {url}")
+        if config.check == 0:
+            # 获取每个链接的详细信息
+            with open(config.save_informations, 'w', newline='', encoding='utf-8') as file:
+                fieldnames = ["Title", "Authors", "Abstract", "Keywords", "Ratings", "Confidences"]
+                writer = csv.DictWriter(file, fieldnames=fieldnames)
+                writer.writeheader()
+                
+                for url in urls:
+                    info = get_information(browser, url, config)
+                    if info:
+                        writer.writerow(info)
+                        print(info)
+                    else:
+                        print(f"Failed to retrieve data from {url}")
     except Exception as e:
         print(f"Error during meta crawling: {e}")
     finally:
