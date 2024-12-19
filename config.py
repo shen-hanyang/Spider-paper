@@ -19,6 +19,7 @@ class Config():
         parser.add_argument('--_from', type=int, default=0)
         parser.add_argument('--num_browsers',type=int, default=5)
         parser.add_argument('--browser', type=str, default='edge')
+        parser.add_argument('--check', type=int, default=1)
         
         # Time
         parser.add_argument('--wait_time', type=int, default=20)
