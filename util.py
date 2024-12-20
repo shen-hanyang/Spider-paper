@@ -16,8 +16,9 @@ def get_urls(browser, config):
     data_id_list = []
     
     try:
-        browser.get(config.url)
+        browser.get(config.url)       
         browser.set_page_load_timeout(config.timeout)
+        time.sleep(config.wait_time)
         while True:
             print(f'Page: {page}')
             try:
@@ -34,7 +35,8 @@ def get_urls(browser, config):
                     browser.execute_script("arguments[0].click();", next_btn)
                     time.sleep(config.wait_time)
                     page += 1
-                except Exception:
+                except Exception as e:
+                    print(f"Error while fetching right arrow: {e}")
                     break  # 没有下一页时退出循环
             except Exception as e:
                 print(f"Error while fetching URLs: {e}")
@@ -49,7 +51,6 @@ def get_information(browser, url, config):
     try:
         browser.get(url)
         browser.set_page_load_timeout(config.timeout)
-        time.sleep(config.wait_time)
         
         title = string.capwords(browser.find_element(By.CLASS_NAME, "citation_title").text)
         author = string.capwords(browser.find_element(By.CSS_SELECTOR, "div.forum-authors.mb-2").text).split(', ')
@@ -85,21 +86,26 @@ def crawl_meta(config):
     executable_path = config.executable_path
     service = Service(executable_path)
     options = EdgeOptions() if config.browser == "edge" else ChromeOptions()
+    options.page_load_strategy = 'none'
     # options.add_argument("--headless")
     options.add_argument("--no-sandbox")
     browser = webdriver.Edge(service=service, options=options) if config.browser == "edge" else webdriver.Chrome(service=ChromeService(executable_path), options=options)
     browser.set_page_load_timeout(config.timeout)
     browser.delete_all_cookies()
     try:
-        urls = get_urls(browser, config)
-        print(f"Number of submissions: {len(urls)}")
+        if config.crawl_url == 1:
+            urls = get_urls(browser, config)
+            print(f"Number of submissions: {len(urls)}")
+            
+            # 保存URL
+            with open(config.save_urls, 'w') as f:
+                for url in urls:
+                    f.write(f'{url}\n')
         
-        # 保存URL
-        with open(config.save_urls, 'w') as f:
-            for url in urls:
-                f.write(f'{url}\n')
-        
-        if config.check == 0:
+        if config.crawl_info == 1:
+            with open(config.save_urls, 'r') as f:
+                urls = [line.strip() for line in f]
+            
             # 获取每个链接的详细信息
             with open(config.save_informations, 'w', newline='', encoding='utf-8') as file:
                 fieldnames = ["Title", "Authors", "Abstract", "Keywords", "Ratings", "Confidences"]
