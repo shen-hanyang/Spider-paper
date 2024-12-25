@@ -61,19 +61,19 @@ parser.add_argument('--level', type=str, default='oral')
 
 For NeurIPS 2024, first find the URL for the NeurIPS 2024 OpenReview webpage (e.g., https://openreview.net/group?id=NeurIPS.cc/2024/Conference#tab-accept-oral). This page shows accepted oral-level papers.
 
-![image-20241225124917818](..\assets\image-20241225124917818.png)
+![image-20241225124917818](\assets\image-20241225124917818.png)
 
 To scrape papers for all levels (Oral, Spotlight, Poster), set the level parameter accordingly. The URL can be retrieved by inspecting the network request in the browser's developer tools.
 
 Open the "Network" tab, click the "Next" button on the page, and find the URL of the data request.
 
-![image-20241225125232970](..\assets\image-20241225125232970.png)
+![image-20241225125232970](\assets\image-20241225125232970.png)
 
-![image-20241225125510661](..\assets\image-20241225125510661.png)
+![image-20241225125510661](\assets\image-20241225125510661.png)
 
 The request URL we found is: https://api2.openreview.net/notes?content.venue=NeurIPS%202024%20oral&details=replyCount%2Cpresentation&domain=NeurIPS.cc%2F2024%2FConference&limit=25&offset=25.
 
-![image-20241225125641982](..\assets\image-20241225125641982.png)
+![image-20241225125641982](\assets\image-20241225125641982.png)
 
 Note:
 - The limit parameter represents the maximum number of papers per request and can be set to 1000.
