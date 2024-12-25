@@ -14,7 +14,7 @@ from util import (
 # Main entry point of the script
 if __name__ == '__main__':
     # Define the conference and year
-    conference = 'NeurIPS'  # Name of the conference (e.g., NeurIPS)
+    conference = 'ICML'  # Name of the conference (e.g., NeurIPS)
     year = '2024'           # Year of the conference (e.g., 2024)
 
     # Define the path to save the data
